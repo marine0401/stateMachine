@@ -1,5 +1,7 @@
 #include "mysocket.h"
+#include "tools.h"
 
+QTcpSocket *MySocket::m_socket;
 MySocket::MySocket(qintptr handle):QObject(),m_socketDescriptor(handle)
 {
     send_buffer.append(0x57);
@@ -8,6 +10,8 @@ MySocket::MySocket(qintptr handle):QObject(),m_socketDescriptor(handle)
     send_buffer.append(0x01);
     send_buffer.append(0x01);
     send_buffer.reserve(4);
+
+    m_handlers.insert(GET_MESSAGE, retMessage);
 }
 MySocket::~MySocket()
 {
@@ -44,57 +48,56 @@ void MySocket::read()
         {
             if(m_buffer.size() >= packetPtr->length)
             {
-
-                if(packetPtr->cmdID == 0x01)
+                if(m_handlers.keys().contains((eCmdID)packetPtr->cmdID))
                 {
-                    qint64 dataLen = packetPtr->length - 4; //数据长度
-                    char * data = (char *)malloc(dataLen);
-                    memcpy(data,dataPtr+4,dataLen);
-                    send_buffer[3] = packetPtr->cmdID;
-
-                    send_buffer.append(data[0]);
-                    if(data[0] & 0x01)
-                    {
-
-                        QFile file("/sys/class/net/eth1/address");
-                        file.open(QIODevice::ReadOnly);
-
-                        send_buffer.append(file.read(17));
-
-                    }
-
-                    send_buffer[2] = ((unsigned short)send_buffer.size() >> 8) & 0xff;
-                    send_buffer[1] = (unsigned short)send_buffer.size() & 0xff;
-
-
-                    char *dat = send_buffer.data();
-                       int j =0;
-
-                        while (j < send_buffer.size()) {
-                            qDebug() << " [" << QByteArray(1,*dat).toHex() << "] " ;
-                            ++dat;
-                            ++j;
-                      }
-
-
-                    m_socket->write(send_buffer);
-                    m_socket->waitForBytesWritten();
-                    send_buffer.remove(4,send_buffer.size() - 4);
-                    delete data;
-                    m_buffer.remove(0,packetPtr->length);
-
+                   Handler handler = m_handlers.value((eCmdID)packetPtr->cmdID);
+                   QByteArray packet(dataPtr,packetPtr->length);
+                   (*handler)(packet);
                 }
-
-
+                    m_buffer.remove(0,packetPtr->length);
 
              }
         }
-
     }
 
-
-
-
-
 }
+
+/**
+ * @brief retMacAddress 返回mac地址
+ */
+void MySocket::retMessage(const QByteArray &data)
+{
+    QByteArray send_buffer;
+    Packet *packetPtr = (Packet *)data.data();
+    if(packetPtr->cmdID == GET_MESSAGE)
+    {
+
+
+        if(packetPtr->data[0] & MAC_ADDRESS)
+        {
+        #ifdef _WIN32
+        //在win下编译
+            send_buffer.append(Tools::getCpuId());
+        #else
+
+            QFile file("/sys/class/net/eth1/address");
+            file.open(QIODevice::ReadOnly);
+
+            send_buffer.append(file.read(17));
+
+            file.close();
+          #endif
+        }
+
+        // packetPtr->data[0] 发还客户端
+        QByteArray sendPacket = commonPacket(GET_MESSAGE,packetPtr->data[0] ,send_buffer);
+
+        m_socket->write(sendPacket);
+        m_socket->waitForBytesWritten();
+    }
+}
+
+
+
+
 

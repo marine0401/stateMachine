@@ -10,6 +10,7 @@ class MySocket:public QObject
 {
     Q_OBJECT
 public:
+    typedef void (*Handler)(const QByteArray &) ;
     MySocket(qintptr handle);
     ~MySocket();
     void init();
@@ -18,13 +19,17 @@ public slots:
 signals:
     void Disconnected();
 private:
-    QTcpSocket *m_socket;
+    static QTcpSocket *m_socket; // 暂时改为静态
     QTcpServer *m_server;
     QByteArray m_buffer;
 
     QByteArray send_buffer;
 
     qintptr m_socketDescriptor;
+
+    QHash<eCmdID, Handler> m_handlers;
+private slots:
+    static void retMessage(const QByteArray &);
 
 };
 

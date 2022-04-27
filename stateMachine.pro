@@ -18,6 +18,7 @@ SOURCES += \
     main.cpp \
     messagedevice.cpp \
     mqttreceiver.cpp \
+    protocol.cpp \
     tools.cpp \
     widget.cpp \
     mysocket.cpp \
