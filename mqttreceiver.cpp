@@ -6,7 +6,7 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QThread>
-
+#include<QFile>
 #include "mqttreceiver.h"
 #include "tools.h"
 
@@ -28,7 +28,10 @@ void MQTTReceiver::init(QString hostname, QString username, QString password)
     m_hostname = hostname;
     m_username = username;
     m_password = password;
-    clientId = Tools::getCpuId();
+    QFile file("/sys/class/net/eth1/address");
+    file.open(QIODevice::ReadOnly);
+    clientId = QString(file.read(17));
+    //clientId = Tools::getCpuId();
     if(clientId != "fail")
     {
        m_clientId = clientId;

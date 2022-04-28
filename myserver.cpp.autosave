@@ -1,0 +1,59 @@
+#include "myserver.h"
+
+MyServer::MyServer()
+{
+    thread_List.reserve(5);
+    for (int i = 0; i < 5; i++) {
+        thread_List.append(nullptr);
+    }
+}
+MyServer::~MyServer()
+{
+    for(int i=0; i < 5;i++)
+    {
+        if(thread_List[i])
+        {
+            thread_List[i]->quit();
+
+            thread_List[i]->wait();
+        }
+    }
+}
+void MyServer::incomingConnection(qintptr handle)
+{
+    qDebug() << "***************************************************" << endl;
+
+        if( QThread *thread = this->getThread() )
+        {
+            MySocket *m_socket = new MySocket(handle);
+            m_socket->moveToThread(thread);
+            connect(thread,&QThread::started,m_socket,&MySocket::init);
+            connect(thread,&QThread::finished,m_socket,&MySocket::deleteLater);
+            thread->start();
+            connect(m_socket,&MySocket::Disconnected,thread,&QThread::quit);
+        }
+        else
+        {
+            qDebug() << "thread is not enough " << endl;
+            return ;
+        }
+       
+
+}
+
+QThread * MyServer::getThread()
+{
+    for(int i = 0; i < 5;i++)
+    {
+        if(thread_List[i] == nullptr)
+        {
+            thread_List[i] = new QThread();
+            return thread_List[i];
+        }
+        if(!thread_List[i]->isRunning())
+        {
+            return thread_List[i];
+        }
+    }
+    return nullptr;
+}
