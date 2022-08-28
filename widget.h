@@ -35,7 +35,7 @@ private slots:
 
     void onHandleMessage(const QJsonObject &msg);
 
-
+    void on_dispalyCode_clicked();
 
 private:
     Ui::Widget *ui;
@@ -48,5 +48,6 @@ private:
     QThread m_socketThread;
     MyServer *m_server;
 
+    void GenerateQRcode(QString tempstr);
 };
 #endif // WIDGET_H

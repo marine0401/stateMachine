@@ -4,6 +4,7 @@ QT += mqtt
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
+DEFINES += HAVE_CONFIG_H
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -22,7 +23,17 @@ SOURCES += \
     tools.cpp \
     widget.cpp \
     mysocket.cpp \
-    myserver.cpp
+    myserver.cpp \
+    qrencode-4.1.0/bitstream.c \
+    qrencode-4.1.0/mask.c \
+    qrencode-4.1.0/mmask.c \
+    qrencode-4.1.0/mqrspec.c \
+    qrencode-4.1.0/qrenc.c \
+    qrencode-4.1.0/qrencode.c \
+    qrencode-4.1.0/qrinput.c \
+    qrencode-4.1.0/qrspec.c \
+    qrencode-4.1.0/rsecc.c \
+    qrencode-4.1.0/split.c \
 
 HEADERS += \
     Tools/appconfig.h \
@@ -36,7 +47,18 @@ HEADERS += \
     widget.h \
     mysocket.h \
     protocol.h \
-    myserver.h
+    myserver.h \
+    qrencode-4.1.0/bitstream.h \
+    qrencode-4.1.0/config.h \
+    qrencode-4.1.0/mask.h \
+    qrencode-4.1.0/mmask.h \
+    qrencode-4.1.0/mqrspec.h \
+    qrencode-4.1.0/qrencode.h \
+    qrencode-4.1.0/qrencode_inner.h \
+    qrencode-4.1.0/qrinput.h \
+    qrencode-4.1.0/qrspec.h \
+    qrencode-4.1.0/rsecc.h \
+    qrencode-4.1.0/split.h \
 
 FORMS += \
     widget.ui
@@ -46,8 +68,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += \
-    resource/2.png
 
 RESOURCES += \
     Resource.qrc

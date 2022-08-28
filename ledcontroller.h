@@ -53,6 +53,7 @@ private slots:
     void onHandleMessage(const QJsonObject &msg);
     void onStateChange(const eLedState &state, int interval, const QString &msg);
 
+
 public slots:
     void onListenNetState(QMqttClient::ClientState state);
 

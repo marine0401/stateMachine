@@ -53,7 +53,11 @@ void MQTTReceiver::onStart()
     m_client->setPassword(m_password);
     m_client->setWillTopic(GEN_DEVICE_STATE_TOPIC(m_clientId));
     m_client->setWillRetain(true);
-    m_client->setWillMessage("offline");
+    QJsonObject willMessageJson = {
+        {"deviceState", "offline"},
+    };
+    QJsonDocument willMessageDocument(willMessageJson);
+    m_client->setWillMessage(willMessageDocument.toJson());
 
 
     connect(m_client, &QMqttClient::stateChanged, this, &MQTTReceiver::onStateChanged);
